@@ -26,7 +26,7 @@
 % title page.
 %t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{Template báo cáo KHTN}
+\title{Chatbot hỗ trợ thương mại điện tử}
 %----------------------------------------------------------------------------------------
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
@@ -34,11 +34,18 @@
 \documentclass[12pt]{article}
 \usepackage[T5]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{indentfirst} % thục dòng cái dòng đầu tiên 
 \usepackage[vietnamese,english]{babel}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage{listings}
+\usepackage{xcolor}
+\lstset{basicstyle=\tiny,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue}
+}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=true,
@@ -62,33 +69,36 @@
 
 \textsc{\LARGE Đại học Khoa học tự nhiên}\\[1.5cm] % Name of your university/college
 \textsc{\Large Ngành hệ thống thông tin}\\[0.5cm] % Major heading such as course name
-\textsc{\large Môn học: Tên môn học }\\[0.5cm] % Minor heading such as course title
+\textsc{\large Môn học: HỆ CƠ SỞ DỮ LIỆU NÂNG CAO }\\[0.5cm] % Minor heading such as course title
 
 %----------------------------------------------------------------------------------------
 %	TITLE SECTION
 %----------------------------------------------------------------------------------------
 
 \HRule \\[0.4cm]
-{ \huge \bfseries Template bao cao}\\[0.4cm] % Title of your document
+{ \huge \bfseries 
+Chatbot hỗ trợ thương mại điện tử
+}\\[0.4cm] % Title of your document
 \HRule \\[1.5cm]
  
 %----------------------------------------------------------------------------------------
 %	AUTHOR SECTION
 %----------------------------------------------------------------------------------------
 
-\begin{minipage}{0.4\textwidth}
+\begin{minipage}{0.5 \textwidth}
 \begin{flushleft} \large
 \emph{Học viên:}\\
-Tên học viên -- MSSV % Your name
+Thái Thiện 17C12031 \\ % Your name
+Lê Võ Minh Thư 17C12033
 \end{flushleft}
 \end{minipage}
 ~
-\begin{minipage}{0.4\textwidth}
+\begin{minipage}{0.45 \textwidth}
 \begin{flushright} \large
 \emph{Giảng viên:} \\
-TS. Tên giảng viên % Supervisor's Name
+TS. Nguyễn Trần Minh Thư % Supervisor's Name
 \end{flushright}
-\end{minipage}\\[2cm]
+\end{minipage}\\[1cm]
 
 % If you don't want a supervisor, uncomment the two lines below and remove the section above
 %\Large \emph{Author:}\\
@@ -114,35 +124,79 @@ TS. Tên giảng viên % Supervisor's Name
 \end{titlepage}
 
 
-\section{Giới thiệu}
-Đây là template để làm báo cáo. Hỗ trợ gõ tiếng việt.
+\section{Bài toán đặt ra}
 
-\subsection{Chèn hình}
-
-Trích dẫn hình \ref{fig:node} trong đoạn chữ. 
-
-% % Commands to include a figure:
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.5\textwidth]{image/node.PNG}
-\caption{\label{fig:node} Nút}
-\end{figure}
+\subsection{Chatbot}
+	Chatbot là một hệ thống tự động có thể giao tiếp với người dùng để thực hiện các thao tác được lập trình sẵn.  Trong thương mại điện tử, Chatbot được dùng thay nhân viên trực tổng đài để tiếp khách hàng và giúp đỡ khách hàng một số tác vụ đơn giản như tìm kiếm sản phẩm. Từ đó giúp tiết kiệm nhân công, kênh liên lạc luôn thông suốt.
+	
+    Chúng em xây dựng ứng dụng Chatbot cho một trang thương mại điện tử trên nền tảng Telegram. 
 
 
-% chuong 3
-\section{Chèn đoạn code}
+\subsection{Thông tin ứng dụng}
 
 
-ví dụ code \ref{lst:vdcode} là code python 
+%%%%%%%%%%%%%%%%%%%%%START EXAMPLE THING%%%%%%%%%%%%%%%
+% % % Commands to include a figure:
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=0.5\textwidth]{image/node.PNG}
+% \caption{\label{fig:node} Nút}
+% \end{figure}
 
 
-\begin{lstlisting}[caption={Đoạn code}, label={lst:vdcode}, language=python]
-s = "I am Pusheen the cat"
-print(s)
+% % chuong 3
+% \section{Chèn đoạn code}
+
+
+% ví dụ code \ref{lst:vdcode} là code python 
+
+
+% \begin{lstlisting}[caption={Đoạn code}, label={lst:vdcode}, language=python]
+% s = "I am Pusheen the cat"
+% print(s)
+% \end{lstlisting}
+
+% ví dụ trích dẫn \cite{robinson2013graph}
+%%%%%%%%%%%%%% END EXAMPLE THING %%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Xây dựng ứng dụng}
+
+\subsection{Mô hình hóa dữ liệu}
+
+\subsection{Công cụ hỗ trợ chuyển đổi dữ liệu}
+
+\subsection{Chatbot nền tảng Telegram}
+
+\section{Triển khai ứng dụng}
+
+\subsection{Cài đặt hệ thống}
+
+Ứng dụng nên được triển khai trên hệ điều hành Ubuntu 18.04 LTS hoặc 16.04 LTS. Các yêu cầu: 
+
+\begin{itemize}
+\item Java (cài bằng sdkman \footnote{\url{https://sdkman.io/}})
+\item gradle (cài bằng sdkman)
+\item Python 3.6 (cài bằng Anaconda \footnote{\url{https://www.anaconda.com/download/}}hoặc Miniconda \footnote{\url{https://conda.io/miniconda.html}})
+\end{itemize}
+
+\subsection{Cài đặt và nạp dữ liệu vào Neo4j}
+\subsubsection{Cài đặt Neo4j}
+
+Có 2 cách để cài đặt Neo4j: cài thông qua Neo4j Desktop hoặc cài trực tiếp Neo4j Community Edition
+
+Tải bản Neo4j Desktop tại trang chủ \footnote{Tải về Neo4j Desktop https://neo4j.com/developer/guide-neo4j-desktop/} và cài đặt. Neo4j Desktop hỗ trợ những công cụ cần thiết để dựng một cơ sở dữ liệu trên máy cá nhân. Chạy Neo4j Desktop để tạo một graph database ở localhost (trên máy cá nhân). Phương pháp này chỉ nên dùng để thử nghiệm và sử dụng trong quá trình phát triển phần mềm, không nên dùng khi triển khai (Chạy thực tế)
+
+Để cài đặt Neo4j Community Edition, làm theo hướng dẫn \footnote{https://neo4j.com/docs/operations-manual/current/installation/linux/debian/}. Cụ thể, chỉ cần chạy các câu lệnh sau (Listing \ref{list:installneo4j})
+
+\begin{lstlisting}[language=bash,caption={Cài Neo4j},label={list:installneo4j}]
+wget -O - https://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
+echo 'deb https://debian.neo4j.org/repo stable/' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
+sudo apt-get update
+sudo apt-get install neo4j=1:3.4.5
 \end{lstlisting}
 
-ví dụ trích dẫn \cite{robinson2013graph}
-
+\subsection{Thiết lập chatbot}
+\subsubsection{Cài đặt tài khoảng Bot trên Telegram}
 
 \bibliographystyle{IEEEtran}
 \bibliography{bib}
