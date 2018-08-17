@@ -132,10 +132,10 @@ TS. Nguyễn Trần Minh Thư % Supervisor's Name
 \subsection{Chatbot}
 	Chatbot là một hệ thống tự động có thể giao tiếp với người dùng để thực hiện các thao tác được lập trình sẵn.  Trong thương mại điện tử, Chatbot được dùng thay nhân viên trực tổng đài để tiếp khách hàng và giúp đỡ khách hàng một số tác vụ đơn giản như tìm kiếm sản phẩm. Từ đó giúp tiết kiệm nhân công, kênh liên lạc luôn thông suốt.
 	
-    Chúng em xây dựng ứng dụng Chatbot cho một trang thương mại điện tử trên nền tảng Telegram. 
-
 
 \subsection{Thông tin ứng dụng}
+
+Trong đồ án này, nhóm chúng tôi xây dựng một chatbot cho trang thương mại điện tử "Xưởng may Thiên Phúc\footnote{\url{http://xuongmaythienphuc.vn/}}". Chatbot sẽ có tính năng chính là tìm kiếm và hiển thị thông tin sản phẩm. Mỗi sản phẩm trả về sẽ kèm đường dẫn tới trang thương mại điện tử, giúp khách hàng dễ dàng đăt hàng.
 
 
 %%%%%%%%%%%%%%%%%%%%%START EXAMPLE THING%%%%%%%%%%%%%%%
@@ -166,7 +166,74 @@ TS. Nguyễn Trần Minh Thư % Supervisor's Name
 
 \subsection{Mô hình hóa dữ liệu}
 
-\subsection{Công cụ hỗ trợ chuyển đổi dữ liệu}
+Dữ liệu nhập vào sẽ có dạng bảng có nhiều cột. Nhưng ta chỉ cần quan tâm 4 cột: Nhóm hàng, Mã hàng, Tên hàng, Giá bán. Dữ liệu cần nhập vào có bảng như dưới đây.
+
+\begin{center}
+ \begin{tabular}{||c c c c||} 
+ \hline
+ Nhóm hàng & Mã hàng & Tên hàng & Giá bán \\ [0.5ex] 
+ \hline\hline
+ Đồ Bộ Nữ & 1675NgoiXLSale & Set Bộ Dài Cam Ngói Phối Màu Sành Điệu & 120000 \\ 
+ \hline
+ Đầm dự tiệc & 1628DoXXLSale & Đầm đỏ body dự tiệc phối ren đuôi cá & 155000 \\
+ \hline
+  Đầm dự tiệc & 1573LSale & Đầm form chữ A tay ren cổ kết pha lê  & 120000 \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+Dữ liệu trong Neo4j sẽ có 4 thực thể: \pagebreak
+
+\textbf{PRODUCT} : Sản phẩm 
+\begin{itemize}
+\item name (String) : Tên sản phẩm, lấy trực tiếp từ cột Tên Hàng trong bảng nguồn. 
+\item normalized\_name (String) : Tên sản phẩm sau khi chuẩn hóa bằng cách bỏ dấu tiếng Việt và đổi sang viết thường. Chuẩn hóa giúp truy vấn tiếng Việt không dấu. 
+\item url (String) : Đường dẫn tới sản phẩm trên trang "Xưởng may Thiên Phúc" 
+\end{itemize}
+
+
+\textbf{CATEGORY} : Nhóm hàng 
+\begin{itemize}
+\item name (String) : Tên nhóm hàng, lấy trực tiếp từ cột Nhóm hàng trong bảng nguồn
+\item normalized\_name (String) : Tên nhóm hàng sau khi chuẩn hóa bằng cách bỏ dấu tiếng Việt và đổi sang viết thường. Chuẩn hóa giúp truy vấn tiếng Việt không dấu. 
+\end{itemize}
+
+\textbf{ITEM} : Mặt hàng. 
+\begin{itemize}
+\item code (String) : Mã hàng trong bảng nguồn. 
+\item price (int) : giá tiền (đơn vị VND)  
+\end{itemize}
+
+Quan hệ giữa các thực thể 
+\begin{itemize}
+\item Một PRODUCT có từ 1 đến n quan hệ BELONG\_TO với CATEGORY
+\item Một CATEGORY có từ 1 đến n quan hệ BELONG\_TO với PRODUCT
+\item Một PRODUCT có từ 1 đến n quan hệ HAS với ITEM 
+\item Một ITEM chỉ có 1 quan hệ HAS đến 1 PRODUCT 
+\end{itemize}
+
+CÓ thể diễn đạt bằng lời thế này: Mỗi sản phẩm thuộc nhiều nhóm hàng và có nhiều mặt hàng. Mội mặt hàng chỉ thuộc về một sản phẩm. 
+
+Hình \ref{fig:datastructure} biểu diễn mối quan hệ giữa các thực thể. Hình \ref{fig:datastructureexample} biểu diễn trực quan hóa trên Neo4j gồm một CATEGORY (Nhóm hàng) với 2 PRODUCT (Sản phẩm) và các ITEM (mặt hàng) của mỗi sản phẩm.  
+
+% Commands to include a figure:
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{image/neo4jdatastructure.png}
+\caption{\label{fig:datastructure} Sơ đồ đồ quan hệ các thực thể}
+\end{figure}
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{imagev2/vddatamodel.png}
+\caption{\label{fig:datastructureexample} Ví dụ đơn giản}
+\end{figure}
+
+
+\subsection{Chuyển đổi và nạp dữ liệu}
+
+
 
 \subsection{Chatbot nền tảng Telegram}
 
