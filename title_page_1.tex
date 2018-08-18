@@ -55,8 +55,9 @@
     urlcolor=cyan,
 }
 
-\renewcommand{\figurename}{Hình }
+
 \renewcommand{\lstlistingname}{Mã }% Listing -> Algorithm
+\addto\captionsenglish{\renewcommand{\figurename}{Hình}}
 
 \begin{document}
 
@@ -126,6 +127,8 @@ TS. Nguyễn Trần Minh Thư % Supervisor's Name
 
 \end{titlepage}
 
+\tableofcontents
+\newpage
 
 \section{Bài toán đặt ra}
 
@@ -212,9 +215,11 @@ Quan hệ giữa các thực thể
 \item Một ITEM chỉ có 1 quan hệ HAS đến 1 PRODUCT 
 \end{itemize}
 
-CÓ thể diễn đạt bằng lời thế này: Mỗi sản phẩm thuộc nhiều nhóm hàng và có nhiều mặt hàng. Mội mặt hàng chỉ thuộc về một sản phẩm. 
+Có thể diễn đạt bằng lời thế này: Mỗi sản phẩm thuộc nhiều nhóm hàng và có nhiều mặt hàng. Mội mặt hàng chỉ thuộc về một sản phẩm. 
 
 Hình \ref{fig:datastructure} biểu diễn mối quan hệ giữa các thực thể. Hình \ref{fig:datastructureexample} biểu diễn trực quan hóa trên Neo4j gồm một CATEGORY (Nhóm hàng) với 2 PRODUCT (Sản phẩm) và các ITEM (mặt hàng) của mỗi sản phẩm.  
+
+Chiều của quan hệ không ảnh hưởng đến quá trình nạp dữ liệu và truy vấn dữ liệu trong trường hợp sử dụng của đồ án này. 
 
 % Commands to include a figure:
 \begin{figure}[h]
@@ -232,8 +237,96 @@ Hình \ref{fig:datastructure} biểu diễn mối quan hệ giữa các thực t
 
 
 \subsection{Chuyển đổi và nạp dữ liệu}
+Chúng tôi chuyển đổi dữ liệu từ dạng bản sang các Neo4j Cypher, và dùng cypher đó để nạp vào cơ sở dữ liệu. Mã nguồn nằm trong thư mục csdlnc-util và hướng dẫn sử dụng được trình bày ở mục \ref{sec:csdlncutil}. Mỗi dòng trong bảng nguồn sẽ tạo ra 5 truy vấn. 
 
+Các bước chuyển đổi: 
+\begin{itemize}
+\item Tạo CATEGORY 
+\item Tạo PRODUCT 
+\item Tạo ITEM
+\item Tạo quan hệ BELONG\_TO giữa CATEGORY và PRODUCT 
+\item Tạo quan hệ HAS giữa PRODUCT và ITEM
+\end{itemize}
 
+Ta lấy ví dụ, để nạp dòng đầu tiên vào Neo4j cần 5 truy vấn sau
+
+\subsubsection{Tạo CATEGORY}\label{sec:mergecategory}
+MERGE (category:CATEGORY{name: 'đồ bộ nữ', normalized\_name: 'do bo nu' })
+
+Từ khóa MERGE sẽ tìm trong cơ sở dữ liệu thực thể CATEGORY như định nghĩa trong ngoặc tròn. Nếu không tìm được thực thể CATEGORY nào như định nghĩa, Neo4j sẽ tạo thực thể mới. Dùng MERGE thay CREATE sẽ giúp xử lý trường hợp trùng, lập nút. Ngoài ra, ở bước nạp dữ liệu, ta không cần xử lý query để xem Neo4j đã tồn tại thực thể đó chưa 
+
+\subsubsection{Tạo PRODUCT}\label{sec:mergeproduct}
+
+MERGE (product:PRODUCT{ name:'Set Bộ Dài Cam Ngói Phối Màu Sành Điệu', url: 'http://xuongmaythienphuc.vn/component/products/set-bo-dai-cam-ngoi-phoi-mau-sanh-dieu.html', normalized\_name: 'set bo dai cam ngoi phoi mau sanh dieu'})
+
+\subsubsection{Tạo ITEM}\label{sec:mergeitem}
+
+MERGE (item:ITEM{code:'1675ngoixlsale', price: 120000})
+
+\subsubsection{Tạo mối quan hệ}\label{sec:mergerel}
+
+\textit{Câu truy vấn tạo quan hệ BELONG\_TO:} 
+
+\medskip
+
+MATCH (category:CATEGORY), (product:PRODUCT) 
+
+WHERE category.name = 'đồ bộ nữ' AND product.name = 'Set Bộ Dài Cam Ngói Phối Màu Sành Điệu'
+
+MERGE (category)<-[:BELONG\_TO]-(product)
+
+\bigskip
+
+\textit{Câu truy vấn tạo quan hệ HAS:}
+
+\medskip
+
+MATCH (product:PRODUCT),(item:ITEM) 
+
+WHERE  product.name = 'Set Bộ Dài Cam Ngói Phối Màu Sành Điệu' AND item.code = '1675ngoixlsale' 
+
+MERGE (product)-[:HAS]->(item)
+
+\bigskip
+
+Một câu truy vấn có thể viết nhiều dòng. Nhưng mỗi dòng chỉ có thể chứa tối đa một câu truy vấn. Ta có thể nhập câu truy vấn nhiều dòng vào Neo4j Browser (Shift+Enter để xuống dòng, Ctrl + Enter để thực hiện truy vấn). Đối với các Neo4j driver, mỗi câu truy vấn là một chuỗi string có thể chứa dấu xuống hàng. Truy vấn nhiều hàng sau khi gộp lại một hàng có cùng ý nghĩa. 
+
+\subsubsection{Gộp 5 câu truy vấn lại một câu truy vấn}
+Có thể gộp cả 5 câu truy vấn trên thành 1 câu truy vấn duy nhất. Tuy nhiên, chúng tôi chưa áp dụng vào đồ án vì để giữ cho các câu truy vấn đơn giản, giúp dễ dàng gỡ lỗi khi cần thiết. Dưới đây là phương pháp gộp câu truy vấn. Phương pháp: 
+
+\begin{itemize}
+\item gộp 3 câu truy vấn MERGE tạo CATEGORY, PRODUCT, ITEM ở bước \ref{sec:mergecategory}, \ref{sec:mergeproduct}, \ref{sec:mergeitem}. 
+\item bỏ vế MATCH và WHERE ở bước tạo quan hệ \ref{sec:mergerel}. 
+\item gộp cả 5 MERGE lại (giữ nguyên thứ tự) thành câu truy vấn duy nhất 
+\end{itemize} 
+
+Ví dụ, trường hợp 5 câu truy vấn trên sẽ được gộp lại như sau
+
+\medskip
+
+MERGE (category:CATEGORY{name: 'đồ bộ nữ', normalized\_name: 'do bo nu' })
+
+MERGE (product:PRODUCT{ name:'Set Bộ Dài Cam Ngói Phối Màu Sành Điệu', url: 'http://xuongmaythienphuc.vn/component/products/set-bo-dai-cam-ngoi-phoi-mau-sanh-dieu.html', normalized\_name: 'set bo dai cam ngoi phoi mau sanh dieu'})
+
+MERGE (item:ITEM{code:'1675ngoixlsale', price: 120000})
+
+MERGE (category)<-[:BELONG\_TO]-(product)
+
+MERGE (product)-[:HAS]->(item)
+
+\medskip
+
+Giải thích: 3 vế MERGE đầu tiên không phụ thuộc vào định danh nào. Câu truy vấn tạo quan hệ phụ thuộc vào các định danh product, category, item. Khi đứng 1 mình, ta phải định nghĩa cho các định danh ấy bằng vế MATCH và WHERE. Tuy nhiên, khi gộp chung với các vế MERGE thì ta có thể tái sử dụng các định danh đã được định nghĩa ở các vế MERGE trên. Vì vậy, có thể bỏ các vế MATCH và WHERE. 
+
+\bigskip
+
+Sau khi chạy cả 5 truy vấn, hoặc một truy vấn gộp, ta đều được một đồ thị như hình \ref{fig:cypher} 
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{imagev2/merge5cypher.png}
+\caption{\label{fig:cypher} Đồ thị tạo ra từ dòng đầu tiên trong bảng nguồn}
+\end{figure}
 
 \subsection{Chatbot nền tảng Telegram}
 
@@ -265,7 +358,7 @@ sudo apt-get update
 sudo apt-get install neo4j=1:3.4.5
 \end{lstlisting}
 
-\subsection{Nạp dữ liệu vào Neo4j}
+\subsection{Nạp dữ liệu vào Neo4j}\label{sec:csdlncutil}
 
 Dữ liệu thô từ trang thương mại điện tử có dạng Excel như sau: 
 
