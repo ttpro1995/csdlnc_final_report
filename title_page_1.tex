@@ -134,13 +134,16 @@ TS. Nguyễn Trần Minh Thư % Supervisor's Name
 \section{Bài toán đặt ra}
 
 \subsection{Chatbot}
-	Chatbot là một hệ thống tự động có thể giao tiếp với người dùng để thực hiện các thao tác được lập trình sẵn.  Trong thương mại điện tử, Chatbot được dùng thay nhân viên trực tổng đài để tiếp khách hàng và giúp đỡ khách hàng một số tác vụ đơn giản như tìm kiếm sản phẩm. Từ đó giúp tiết kiệm nhân công, kênh liên lạc luôn thông suốt.
+	Chatbot là một hệ thống tự động có thể giao tiếp với người dùng để thực hiện các thao tác được lập trình sẵn.  Trong thương mại điện tử, Chatbot được dùng thay nhân viên trực tổng đài để tiếp khách hàng và giúp đỡ khách hàng một số tác vụ đơn giản như tìm kiếm sản phẩm. Từ đó giúp tiết kiệm nhân công, kênh liên lạc luôn thông suốt \cite{lazarevich_2018}.
 	
 
 \subsection{Thông tin ứng dụng}
 
 Trong đồ án này, nhóm chúng tôi xây dựng một chatbot cho trang thương mại điện tử "Xưởng may Thiên Phúc\footnote{\url{http://xuongmaythienphuc.vn/}}". Chatbot sẽ có tính năng chính là tìm kiếm và hiển thị thông tin sản phẩm. Mỗi sản phẩm trả về sẽ kèm đường dẫn tới trang thương mại điện tử, giúp khách hàng dễ dàng đăt hàng.
 
+Cơ sở dữ liệu: Neo4j \cite{neo4j}
+
+Nền tảng chat: Telegram \cite{telegrambot}
 
 %%%%%%%%%%%%%%%%%%%%%START EXAMPLE THING%%%%%%%%%%%%%%%
 % % % Commands to include a figure:
@@ -712,8 +715,8 @@ Câu & Lần 1 & Lần 2 & Lần 3 \\ [0.5ex]
 \end{center}
 
 
-\subsubsection{2 Máy chủ}
-Neo4j và Telegrambot nằm ở 2 máy chủ khác nhau, nhưng cùng nhà cung cấp dịch vụ Digital Ocean \footnote{\url{https://digitalocean.com}}. 
+\subsubsection{VPS}
+Neo4j và Telegrambot nằm ở 2 VPS khác nhau, nhưng cùng nhà cung cấp dịch vụ Digital Ocean \footnote{\url{https://digitalocean.com}}. 
 
 \begin{center}
  \begin{tabular}{||c c c c||} 
