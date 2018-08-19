@@ -329,6 +329,33 @@ Sau khi chạy cả 5 truy vấn, hoặc một truy vấn gộp, ta đều đư�
 \caption{\label{fig:cypher} Đồ thị tạo ra từ dòng đầu tiên trong bảng nguồn}
 \end{figure}
 
+\subsubsection{Tạo URL và lọc dữ liệu}
+
+Trước khi chuyển đổi thành các câu truy vấn, mỗi dòng, tên sản phẩm được dùng để tạo ra URL . Cách tạo như sau: 
+
+\begin{itemize}
+\item Từ tên sản phẩm, bỏ dấu tiếng Việt và chuyển sang viết thường 
+\item Thay khoảng trắng " " bằng dấu gạch "-" 
+\item Thêm tiền tố  \url{http://xuongmaythienphuc.vn/component/products/}.
+\item Thêm hậu tố ".html"
+\end{itemize}
+
+Ví dụ: 
+
+Tên sản phẩm "Áo Sơ Mi Trắng Thời Trang Hè 2018" chuyển thành "http://xuongmaythienphuc.vn/component/products/ao-so-mi-trang-thoi-trang-he-2018.html". Sau đó, url sẽ được truy cập để kiểm tra, nếu trả về với mã 200 , thì dòng đó trong excel mới được xử lý tiếp để tạo ra câu truy vấn. 
+
+Dữ liệu Excel có 4725 dòng. Sau khi nạp vào Neo4j, tạo ra 
+
+\begin{itemize}
+\item 12 nút CATEGORY 
+\item 477 nút PRODUCT 
+\item 1195 nút ITEM 
+\item 736 quan hệ BELONG\_TO 
+\item 1195 quan hệ HAS 
+\end{itemize}
+
+
+
 \subsection{Chatbot nền tảng Telegram}
 
 Chatbot sẽ làm 2 việc sau: 
@@ -339,7 +366,9 @@ Chatbot sẽ làm 2 việc sau:
 \item Xây dựng kết quả truy vấn thành câu trả lời cho người dùng 
 \end{itemize}
 
-Chatbot sẽ tiếp nhận yêu cầu của người dùng dưới dạng cú pháp bắt đầu bằng dấu gạch xiên "/". Khi đoạn chat không bắt đầu bằng dấu gạch xien "/" thì chatbot tự hiểu là tìm sản phẩm có tên là đoạn chat 
+Chatbot sẽ tiếp nhận yêu cầu của người dùng dưới dạng cú pháp bắt đầu bằng dấu gạch xiên "/". Khi đoạn chat không bắt đầu bằng dấu gạch xien "/" thì chatbot tự hiểu là tìm sản phẩm có tên là đoạn chat.
+
+Lúc đầu có 4275 dòng excel. Sau khi nạp vào Neo4j, tạo ra 
 
 \subsubsection{/help} 
 Hiển thị bản trợ giúp, bao gồm thông tin các câu lệnh
@@ -570,9 +599,13 @@ sudo apt-get install neo4j=1:3.4.5
 
 \subsection{Nạp dữ liệu vào Neo4j}\label{sec:csdlncutil}
 
-Dữ liệu thô từ trang thương mại điện tử có dạng Excel như sau: 
+Dữ liệu thô từ trang thương mại điện tử có dạng Excel như hình \ref{fig:excelsample}:  
 
-% TODO: gắn hình vào
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{imagev2/danhsachsanpham.PNG}
+\caption{\label{fig:excelsample} Mẫu excel danh sách sản phẩm}
+\end{figure}
 
 Tập tin dữ liệu Excel nằm ở đường dẫn \url{csdlnc_util\\data\\DanhSachSanPham.xlsx}. Ta sẽ dùng các đoạn mã Python (thư mục csdlnc-util) để chuyển Excel thành Neo4j Cypher rồi chạy các cypher để nạp vào cơ sở dữ liệu. 
 
@@ -628,6 +661,82 @@ export NEO4J_PASSWORD=mat_khau_neo4j
 \begin{lstlisting}[language=bash,caption={Chạy bot},label={list:runtelegrambot}]
 java -jar build/libs/telegrambot-3.0-all.jar
 \end{lstlisting}
+
+\section{Đánh giá tốc độ} 
+
+\subsection{Nạp dữ liệu}
+
+Nap dữ liệu ban đầu, có tất cả 7689 câu truy vấn. Cypher được thực hiện trực tiếp trên máy có chứa Neo4j (driver kết nối vào localhost) hoàn thành trung bình trong 28 giây. 
+
+
+\subsection{Sử lý yêu cầu từ người dùng}
+
+Các câu sẽ dùng để thử 
+
+\begin{itemize}
+\item áo sơ mi
+\item /re\_nhat áo sơ mi
+\item /tim\_re\_hon 200000
+\item /khoang\_gia 200000 300000
+\item /tim\_loai áo
+\item /liet\_ke\_loai
+\item /cung\_loai 816f
+\end{itemize}
+
+Thời gian được tính từ lúc bot bắt đầu xử lý câu truy vấn đến khi bot ra được chuỗi string để sẵn sàng trả về cho người dùng (chuỗi -> cypher ->kết quả -> chuỗi trả về), đơn vị milisecond. Không tính thời gian tương tác với nền tảng Telegram (không bao gồm thời gian gởi và nhận dữ liệu đến Telegram). 
+
+\subsubsection{Máy laptop cá nhân}
+Máy cá nhân, Telegrambot và Neo4j nằm trên cùng 1 máy 
+
+\begin{center}
+ \begin{tabular}{||c c c c||} 
+ \hline
+Câu & Lần 1 & Lần 2 & Lần 3 \\ [0.5ex] 
+ \hline
+ \hline
+áo sơ mi  & 62 & 12 & 12 \\ 
+ \hline
+/re\_nhat áo sơ mi & 16 & 32 & 15 \\
+ \hline
+ /tim\_re\_hon 200000 & 64 & 19 & 24 \\
+ \hline
+ /tim\_khoang\_gia 200000 300000 & 15 & 10 & 48 \\
+ \hline
+ /tim\_loai áo & 8 & 8 & 36 \\
+ \hline
+/liet\_ke\_loai & 20 & 8 & 16 \\
+ \hline
+  /cung\_loai 816f & 124 & 8  & 9 \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+
+
+\subsubsection{2 Máy chủ}
+Neo4j và Telegrambot nằm ở 2 máy chủ khác nhau, nhưng cùng nhà cung cấp dịch vụ Digital Ocean \footnote{\url{https://digitalocean.com}}. 
+
+\begin{center}
+ \begin{tabular}{||c c c c||} 
+ \hline
+Câu & Lần 1 & Lần 2 & Lần 3 \\ [0.5ex] 
+ \hline
+ \hline
+áo sơ mi  & 184 & 17 & 19 \\ 
+ \hline
+/re\_nhat áo sơ mi & 84 & 25 & 10 \\
+ \hline
+ /tim\_re\_hon 200000 & 27 & 16 & 13 \\
+ \hline
+ /tim\_khoang\_gia 200000 300000 & 34 & 10 & 23 \\
+ \hline
+ /tim\_loai áo & 45 & 14 & 7 \\
+ \hline
+/liet\_ke\_loai & 8  & 6 & 4 \\
+ \hline
+  /cung\_loai 816f & 18 & 6  & 9 \\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
 
 \bibliographystyle{IEEEtran}
 \bibliography{bib}
