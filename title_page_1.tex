@@ -330,6 +330,198 @@ Sau khi chạy cả 5 truy vấn, hoặc một truy vấn gộp, ta đều đư�
 
 \subsection{Chatbot nền tảng Telegram}
 
+Chatbot sẽ làm 2 việc sau: 
+
+\begin{itemize}
+\item Chuyển đổi đoạn chat của người dùng thành câu truy vấn 
+\item Thực hiện truy vấn để lấy kết quả 
+\item Xây dựng kết quả truy vấn thành câu trả lời cho người dùng 
+\end{itemize}
+
+Chatbot sẽ tiếp nhận yêu cầu của người dùng dưới dạng cú pháp bắt đầu bằng dấu gạch xiên "/". Khi đoạn chat không bắt đầu bằng dấu gạch xien "/" thì chatbot tự hiểu là tìm sản phẩm có tên là đoạn chat 
+
+\subsubsection{/help} 
+Hiển thị bản trợ giúp, bao gồm thông tin các câu lệnh
+
+\subsubsection{/liet\_ke\_loai}
+Liệt kê danh sách tất cả các nhóm hàng 
+
+\subsubsection{/tim\_san\_pham <tên sản phẩm>}
+Thực hiện tìm sản phẩm theo tên. Tên có thể viết có dấu hoặc không có dấu tiếng Việt. 
+Câu truy vấn mẫu cho sản phẩm áo thun ("/tim\_san\_pham áo thun" hoặc "áo thun") như sau: 
+
+\smallskip
+
+MATCH (p:PRODUCT)-[:HAS]-(i:ITEM) 
+
+WHERE p.name=~ '(?i).*áo thun.*' OR p.normalized\_name=~ '.*(?i)ao thun.*' 
+
+RETURN p, i LIMIT 15
+
+\smallskip
+
+Ở về WHERE, dấu =~ sẽ kiểm tra các điều kiện thỏa Regular Expression (Regex) ghi trong dấu ngoặc kép. 
+.*(?i)áo thun.* sẽ thỏa những câu có tồn tại từ "áo thun" (không phân biệt viết hoa, thường) trong cong. Vì vậy, vế WHERE này sẽ tìm những trường hợp mà nút PRODUCT có tên (hoặc tên không dấu) thỏa điều kiện của Regex  
+
+Câu truy vấn trả về thông tin sản phẩm và mặt hàng 
+
+\subsubsection{/tim\_loai <loại hoặc nhóm hàng> }
+
+Tìm sản phẩm theo nhóm hàng.
+
+Ví dụ: "/tim\_loai áo" sẽ tạo ra câu truy vấn sau
+ 
+MATCH (c:CATEGORY)-[:BELONG\_TO]-(p:PRODUCT)
+
+WHERE c.name=~'.*(?i)áo.*' OR c.normalized\_name=~'.*(?i)ao.*'  
+
+return c, p
+
+LIMIT 25
+
+\smallskip
+
+\subsubsection{/tim\_re\_hon <giá> và /tim\_mac\_hon <giá>}
+
+Khi tìm sản phẩm theo giá, bot sẽ trả về sản phẩm gần với giá đó nhất, tùy theo người dùng muốn tìm rẻ hơn hay mắc hơn 
+
+Ví dụ: truy vấn này tìm sản phẩm rẻ hơn 300 000 VND. Vế ORDER BY cùng từ khóa DESC sẽ xếp kết quả theo giá tiền từ cao đến thấp. Vì vậy, ta sẽ được sản phẩm gần với giá tiền ta tìm ở trên. 
+
+MATCH (p:PRODUCT)-[:HAS]-(i:ITEM)
+
+WHERE i.price <= 300000 
+
+RETURN p, i 
+
+ORDER BY i.price DESC 
+
+LIMIT 15
+
+\smallskip
+
+Tương tự, bên dưới đây là ví dụ truy vấn của tìm sản phẩm mắc hơn 300000 VND. Trả về sẽ là các sản phẩm có mặt hàng có giá được xếp theo thứ tự từ 300 000 vnd trở lên. 
+
+MATCH (p:PRODUCT)-[:HAS]-(i:ITEM)
+
+WHERE i.price >= 300000 
+
+RETURN p, i 
+
+ORDER BY i.price  
+
+LIMIT 15
+
+\smallskip
+
+\subsubsection{/re\_nhat và /mac\_nhat }
+
+Trong 2 câu lệnh này, ta có thể thêm tên sản phẩm để lọc những sản phẩm có hoặc để trống tện sản phẩm để tìm với tất cả sản phẩm. 
+
+"/re\_nhat" có câu truy vấn như sau: 
+
+MATCH (p:PRODUCT)-[:HAS]-(i:ITEM)
+
+return p, i 
+
+ORDER BY i.price  
+
+LIMIT 10
+
+\smallskip
+
+Dưới đây là truy vấn của "/mac\_nhat" 
+
+MATCH (p:PRODUCT)-[:HAS]-(i:ITEM)
+
+return p, i 
+
+ORDER BY i.price DESC 
+
+LIMIT 10
+
+\smallskip
+
+Nếu ta thêm vào tên sản phẩm, thì 2 truy vấn trên sẽ thêm vào vế WHERE để lọc kết quả theo tên sản phẩm. Dưới đây là ví dụ của truy vấn "/re\_nhat áo" 
+
+MATCH (p:PRODUCT)-[:HAS]-(i:ITEM)
+
+WHERE p.name=~ '.*(?i)áo.*' OR p.normalized\_name=~ '.*(?i)ao.*' 
+
+RETURN p, i 
+
+ORDER BY i.price  
+
+LIMIT 10
+
+\smallskip
+
+Và "/mac\_nhat áo"
+
+MATCH (p:PRODUCT)-[:HAS]-(i:ITEM)
+
+WHERE p.name=~ '.*(?i)áo.*' OR p.normalized\_name=~ '.*(?i)ao.*' 
+
+RETURN p, i 
+
+ORDER BY i.price DESC 
+
+LIMIT 10
+
+\subsubsection{/tim\_khoang\_gia <chặn dưới> <chặn trên>}
+
+Tìm khoảng giá sẽ trả về danh sách các sản phẩm có mặt hàng nằm trong khoảng giá đề ra. Ví dụ khi người dùng gửi tin nhắn "/tim\_khoang\_gia 200000 300000", bot sẽ tạo ra câu truy vấn sau 
+
+MATCH (p:PRODUCT)-[:HAS]-(i:ITEM)  
+
+WHERE i.price >= 200000 AND i.price <= 300000 
+
+RETURN p, i 
+
+ORDER BY i.price  
+
+LIMIT 15
+
+\subsubsection{/cung\_loai <mã sản phẩm>}
+
+Chức năng này sẽ tìm sản phẩm cùng loại với sản phẩm mình đang quan tâm. Tin nhắn "/cung\_loai 816f" sẽ trả về các sản phẩm cùng loại với mặt hàng có mã 816f. Câu truy vấn được tạo ra như sau: 
+
+MATCH (i:ITEM)-[:HAS]-(pp:PRODUCT)-[:BELONG\_TO]-(c:CATEGORY),
+
+(c)-[:BELONG\_TO]-(p:PRODUCT)  
+
+WHERE i.code = '816f'
+
+RETURN p LIMIT 25
+
+
+
+\subsubsection{Cách thức hiển thị kết quả từ câu truy vấn}
+
+Truy vấn của câu lệnh /tim\_loai, /cung\_loai, sẽ trả chỉ trả về thông tin sản phẩm, Những truy vấn /tim\_san\_pham, /tim\_re\_hon, /tim\_mac\_hon, /tim\_re\_nhat, /tim\_mac\_nhat, /tim\_khoang\_gia sẽ trả về cả thông tin sản phẩm, mã mặt hàng và giá. 
+
+Cụ thể như sau, với mỗi record của PRODUCT, bot sẽ hiển thị như sau: 
+
+<Tên sản phẩm> <đường dẫn đến \url{http://xuongmaythienphuc.vn/}> 
+
+\smallskip
+
+Với mỗi record của ITEM, bot sẽ hiển thị 
+
+<mã sản phẩm> <giá tiền> 
+
+\smallskip 
+
+Khi tồn tại cả PRODUCT và ITEM thì bot sẽ hiển thị tên sản phẩm, và các mã hàng - giá tiền thuộc sản phẩm đó, ví dụ như sau 
+
+<Tên sản phẩm 1> <đường dẫn sp1> 
+<mã sản phẩm 1.1> <giá tiền> 
+<mã sản phẩm 1.2> <giá tiền> 
+<Tên sản phẩm 2> <đường dẫn đến \url{http://xuongmaythienphuc.vn/}> 
+<mã sản phẩm 2.1> <giá tiền> 
+<mã sản phẩm 2.2> <giá tiền> 
+
+
+
 \section{Triển khai ứng dụng}
 
 \subsection{Cài đặt hệ thống}
