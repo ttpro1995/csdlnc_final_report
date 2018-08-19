@@ -41,6 +41,7 @@
 \usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage{listings}
+\usepackage{float}  % force place image HERE with [H]
 \usepackage{xcolor}
 \lstset{basicstyle=\ttfamily,
   showstringspaces=false,
@@ -514,13 +515,30 @@ Với mỗi record của ITEM, bot sẽ hiển thị
 Khi tồn tại cả PRODUCT và ITEM thì bot sẽ hiển thị tên sản phẩm, và các mã hàng - giá tiền thuộc sản phẩm đó, ví dụ như sau 
 
 <Tên sản phẩm 1> <đường dẫn sp1> 
+
 <mã sản phẩm 1.1> <giá tiền> 
+
 <mã sản phẩm 1.2> <giá tiền> 
+
 <Tên sản phẩm 2> <đường dẫn đến \url{http://xuongmaythienphuc.vn/}> 
+
 <mã sản phẩm 2.1> <giá tiền> 
+
 <mã sản phẩm 2.2> <giá tiền> 
 
+Hình \ref{fig:displayproduct} và hình \ref{fig:displayproductitem} minh họa cách hiển thị thông tin của chatbot. 
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{imagev2/displayproduct.png}
+\caption{\label{fig:displayproduct} Chỉ hiển thị sản phẩm}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{imagev2/displayproductitem.png}
+\caption{\label{fig:displayproductitem} hiển thị sản phẩm kèm giá }
+\end{figure}
 
 \section{Triển khai ứng dụng}
 
